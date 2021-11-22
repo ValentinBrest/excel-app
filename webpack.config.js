@@ -9,28 +9,25 @@ const isDev = !isProd;
 
 const filename = ext => isDev? `bundle.${ext}`: `bundle.[hash].${ext}`;
 
-const jsLoader = () => {
-    const loaders = [
-        {
-            loader: "babel-loader",
-            options: {
-                presets: ['@babel/preset-env']
-            }
-        }
-    ]
-    if (isDev) {
-        loaders.push('eslint-loader')
-    }
-    return loaders;
-} 
-
-console.log('IS PROD', isProd);
-console.log('IS DEV', isDev);
+// const jsLoader = () => {
+//     const loaders = [
+//         {
+//             loader: "babel-loader",
+//             options: {
+//                 presets: ['@babel/preset-env']
+//             }
+//         }
+//     ]
+//     if (isDev) {
+//     	loaders.push('eslint-loader')
+//     }
+//     return loaders;
+// };
 
 module.exports = {
     context: path.resolve(__dirname, 'src'),
     mode: 'development',
-    entry: ['@babel/polyfill','./index.js'],
+    entry: ['@babel/polyfill','./index.js'],//
     output: {
         filename: filename('js'),
         path: path.resolve(__dirname, 'dist')
@@ -50,14 +47,18 @@ module.exports = {
     plugins: [
         new CleanWebpackPlugin(),
         new HTMLWebpackPlugin({
-            template: 'index.html'
+            template: 'index.html',
+			minify: {
+				removeComments: isProd,
+				collapseWhitespace: isProd
+			}
         }),
         new CopyPlugin({
             patterns: [
               {
                 from: path.resolve(__dirname, 'src/favicon.ico'),
-                to: path.resolve(__dirname, 'dist') }
-            ]
+                to: path.resolve(__dirname, 'dist') 
+            }]
         }),
         new MiniCssExtractPlugin({
             filename: filename('css')
@@ -76,7 +77,12 @@ module.exports = {
             {
                 test: /\.m?js$/,
                 exclude: /node_modules/,
-                use: jsLoader()
+                use: {
+                  loader: "babel-loader",
+                  options: {
+                    presets: ['@babel/preset-env']
+                  }
+                }
               }
           ],
     }
